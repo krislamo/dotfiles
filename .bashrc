@@ -111,3 +111,6 @@ if ! shopt -oq posix; then
     . /etc/bash_completion
   fi
 fi
+
+# Ask for decryption in terminal window
+GPG_TTY=$(tty)
