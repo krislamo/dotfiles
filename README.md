@@ -1,4 +1,4 @@
-### krislamo's dotfiles
+## krislamo's dotfiles
 
 #### Copyrights and Licenses
 Copyright (C) 2019  Kris Lamoureux
