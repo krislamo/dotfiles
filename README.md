@@ -2,6 +2,15 @@
 
 ### Installation
 
+You may want to backup your current dotfiles:
+
+```
+mv ~/.bash_aliases ~/.bash_aliases-$(date '+%Y%m%d%H%M%S')
+mv ~/.bashrc ~/.bashrc-$(date '+%Y%m%d%H%M%S')
+mv ~/.vimrc ~/.vimrc-$(date '+%Y%m%d%H%M%S')
+```
+
+Then install symlinks in their place:
 ```
 git clone git@github.com:krislamo/dotfiles.git && \
 cd dotfiles && \
