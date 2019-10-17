@@ -1,5 +1,15 @@
 ## krislamo's dotfiles
 
+### Installation
+
+```
+git clone git@github.com:krislamo/dotfiles.git && \
+cd dotfiles && \
+ln -nsf $(pwd)/.bash_aliases ~/.bash_aliases && \
+ln -nsf $(pwd)/.bashrc ~/.bashrc && \
+ln -nsf $(pwd)/.vimrc ~/.vimrc
+```
+
 #### Copyrights and Licenses
 Copyright (C) 2019  Kris Lamoureux
 
