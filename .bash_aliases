@@ -1,5 +1,6 @@
 # Local system administration
 alias 'editalias'='vim ~/.bash_aliases && . ~/.bash_aliases'
+alias 'otheralias'='vim ~/.other_aliases && . ~/.bash_aliases'
 alias 'viewalias'='view ~/.bash_aliases'
 alias 'editssh'='vim ~/.ssh/config'
 alias 'upgrade'='sudo apt update && sudo apt upgrade'
@@ -34,3 +35,5 @@ alias 'day'='redshift -x'
 
 # SOCKS proxy over SSH
 alias 'socks'='screen -dm ssh -D 1337 -q -C -N'
+
+source ~/.other_aliases
