@@ -8,7 +8,17 @@ You may want to backup your current dotfiles:
 mv ~/.bash_aliases ~/.bash_aliases-$(date '+%Y%m%d%H%M%S')
 mv ~/.bashrc ~/.bashrc-$(date '+%Y%m%d%H%M%S')
 mv ~/.vimrc ~/.vimrc-$(date '+%Y%m%d%H%M%S')
+mv ~/.gitconfig ~/.gitconfig-$(date '+%Y%m%d%H%M%S')
 ```
+
+
+You'll want to make sure a couple of files exist to help extend this config with your own regardless if you use them:
+
+```
+touch ~/.gitconfig_other
+touch ~/.other_aliases
+```
+
 
 Then install symlinks in their place:
 ```
@@ -16,7 +26,8 @@ git clone git@github.com:krislamo/dotfiles.git && \
 cd dotfiles && \
 ln -nsf $(pwd)/.bash_aliases ~/.bash_aliases && \
 ln -nsf $(pwd)/.bashrc ~/.bashrc && \
-ln -nsf $(pwd)/.vimrc ~/.vimrc
+ln -nsf $(pwd)/.vimrc ~/.vimrc && \
+ln -nsf $(pwd)/.gitconfig ~/.gitconfig
 ```
 
 #### Copyrights and Licenses
@@ -27,3 +38,4 @@ This program is free software: you can redistribute it and/or modify it under th
 This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License along with this program. If not, see <https://www.gnu.org/licenses/>.
+
