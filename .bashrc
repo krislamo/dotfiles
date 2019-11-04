@@ -113,4 +113,4 @@ if ! shopt -oq posix; then
 fi
 
 # Ask for decryption in terminal window
-GPG_TTY=$(tty)
+export GPG_TTY=$(tty)
