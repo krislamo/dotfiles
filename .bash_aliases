@@ -47,6 +47,7 @@ alias 'log'='git log'
 alias 'checkout'='git checkout'
 alias 'commit'='git commit -S'
 alias 'amend'='git commit -S --amend'
+alias 'fetch'='git fetch'
 
 # Color shift
 alias 'night'='redshift -P -O 2500'
