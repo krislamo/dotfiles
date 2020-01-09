@@ -49,6 +49,11 @@ alias 'commit'='git commit -S'
 alias 'amend'='git commit -S --amend'
 alias 'fetch'='git fetch'
 
+# Docker shortcuts
+function inspect() {
+  docker inspect "$1" | less
+}
+
 # Color shift
 alias 'night'='redshift -P -O 2500'
 alias 'day'='redshift -x'
