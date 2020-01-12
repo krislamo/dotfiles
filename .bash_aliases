@@ -61,6 +61,6 @@ alias 'day'='redshift -x'
 # SOCKS proxy over SSH
 alias 'socks'='screen -dm ssh -D 1337 -q -C -N'
 
-if [ -f ~/.other_aliases ] ; then
+if [ -f ~/.other_aliases ]; then
   source ~/.other_aliases
 fi
