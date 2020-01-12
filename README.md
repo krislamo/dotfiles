@@ -1,34 +1,20 @@
-## krislamo's dotfiles
-
+## Kris' dotfiles
 ### Installation
 
-You may want to backup your current dotfiles:
-
-```
-mv ~/.bash_aliases ~/.bash_aliases-$(date '+%Y%m%d%H%M%S')
-mv ~/.bashrc ~/.bashrc-$(date '+%Y%m%d%H%M%S')
-mv ~/.vimrc ~/.vimrc-$(date '+%Y%m%d%H%M%S')
-mv ~/.gitconfig ~/.gitconfig-$(date '+%Y%m%d%H%M%S')
-```
 
 
-You'll want to make sure a couple of files exist to help extend this config with your own regardless if you use them:
+Clone the repository:
 
-```
-touch ~/.gitconfig_other
-touch ~/.other_aliases
-```
+`git clone https://github.com/krislamo/dotfiles.git`
 
+Symbolic linking is currently based on the working directory, so you must run the install script while you are inside its directory. Navigate into the repository:
 
-Then install symlinks in their place:
-```
-git clone git@github.com:krislamo/dotfiles.git && \
-cd dotfiles && \
-ln -nsf $(pwd)/.bash_aliases ~/.bash_aliases && \
-ln -nsf $(pwd)/.bashrc ~/.bashrc && \
-ln -nsf $(pwd)/.vimrc ~/.vimrc && \
-ln -nsf $(pwd)/.gitconfig ~/.gitconfig
-```
+`cd dotfiles`
+
+Now you will be successful running the install.sh script:
+
+`bash install.sh`
+
 
 #### Copyrights and Licenses
 Copyright (C) 2019  Kris Lamoureux
@@ -38,4 +24,3 @@ This program is free software: you can redistribute it and/or modify it under th
 This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License along with this program. If not, see <https://www.gnu.org/licenses/>.
-
