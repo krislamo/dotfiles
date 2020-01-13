@@ -18,16 +18,16 @@ for FILE in $DOTFILES ; do
     if [ -L ~/$BASEFILE ]; then
       # If basefile is not a file, and therefore is a broken symlink
       if [ ! -f ~/$BASEFILE ]; then
-        read -p "Press [ENTER] to replace broken symlink ~/$BASEFILE. CTRL+C aborts"
+        read -p "Press [ENTER] to replace broken symlink ~/$BASEFILE."
         rm ~/$BASEFILE
         NEWLINK=1
       else
         echo "~/$BASEFILE is already linked."
       fi
-    # If basefile is a regular file
-    elif [ -f ~/$BASEFILE ]; then
+    # If basefile is a regular file or directory
+    elif [ -f ~/$BASEFILE ] || [ -d ~/$BASEFILE ]; then
       DATE=$(date '+%Y%m%d%H%M%S')
-      read -p "Press [ENTER] to move ~/$BASEFILE to ~/$BASEFILE-$DATE. CTRL+C aborts"
+      read -p "Press [ENTER] to move ~/$BASEFILE to ~/$BASEFILE-$DATE."
       mv ~/$BASEFILE ~/$BASEFILE-$DATE
       NEWLINK=1
     else
