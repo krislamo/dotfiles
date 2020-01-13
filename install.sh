@@ -7,7 +7,7 @@
 
 DOTFILES="$(pwd)/.*[a-z]"
 
-for FILE in $DOTFILES ; do
+for FILE in $DOTFILES; do
   BASEFILE=$(basename $FILE)
   NEWLINK=0
 
@@ -36,7 +36,7 @@ for FILE in $DOTFILES ; do
     fi
 
     # Create a new symlink
-    if [ $NEWLINK -eq 1 ] ; then
+    if [ $NEWLINK -eq 1 ]; then
       echo "Creating new link to $(pwd)/$BASEFILE from" ~
       ln -s $(pwd)/$BASEFILE ~/$BASEFILE
     fi
