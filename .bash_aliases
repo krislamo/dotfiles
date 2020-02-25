@@ -33,6 +33,7 @@ alias 'sw'='cd /home/$USER/software && clear'
 
 # Git shortcuts
 alias 'gad'='git add . && git diff --cached'
+alias 'gd'='git diff HEAD~'
 alias 'gdiff'='git diff'
 alias 'status'='git status'
 alias 'pull'='git pull --rebase'
