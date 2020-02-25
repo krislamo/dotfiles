@@ -33,7 +33,6 @@ alias 'sw'='cd /home/$USER/software && clear'
 
 # Git shortcuts
 alias 'gad'='git add . && git diff --cached'
-alias 'gd'='git diff HEAD~'
 alias 'gdiff'='git diff'
 alias 'status'='git status'
 alias 'pull'='git pull --rebase'
@@ -49,6 +48,11 @@ alias 'checkout'='git checkout'
 alias 'commit'='git commit -S'
 alias 'amend'='git commit -S --amend'
 alias 'fetch'='git fetch'
+alias 'stash'='git stash'
+
+function gd() {
+  git diff HEAD~$1
+}
 
 # Docker shortcuts
 function inspect() {
