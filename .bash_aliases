@@ -47,6 +47,7 @@ alias 'log'='git log'
 alias 'checkout'='git checkout'
 alias 'commit'='git commit -S'
 alias 'amend'='git commit -S --amend'
+alias 'amendnew'='git commit -S --amend --date "`date -R`"'
 alias 'fetch'='git fetch'
 alias 'stash'='git stash'
 
