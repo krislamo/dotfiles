@@ -55,6 +55,10 @@ function gd() {
   git diff HEAD~$1
 }
 
+function rebase() {
+  git rebase -i HEAD~$1
+}
+
 # Docker shortcuts
 function inspect() {
   docker inspect "$1" | less
