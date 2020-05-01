@@ -50,6 +50,7 @@ alias 'amend'='git commit -S --amend'
 alias 'amendnew'='git commit -S --amend --date "`date -R`"'
 alias 'fetch'='git fetch'
 alias 'stash'='git stash'
+alias 'resetb'='git reset --hard @{u}'
 
 function gd() {
   git diff HEAD~$1
