@@ -61,6 +61,10 @@ function rebase() {
   git rebase -i HEAD~$1
 }
 
+function delcommit() {
+  git reset --hard HEAD~$1
+}
+
 # Docker shortcuts
 function inspect() {
   docker inspect "$1" | less
