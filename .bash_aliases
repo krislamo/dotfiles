@@ -52,6 +52,8 @@ alias 'amendnew'='git commit -S --amend --date "`date -R`"'
 alias 'fetch'='git fetch'
 alias 'stash'='git stash'
 alias 'resetb'='git reset --hard @{u}'
+alias 'signhist'='git rebase --exec "git commit -S --amend --no-edit -n"'
+alias 'signhistnew'='git rebase --exec "git commit -S --amend --date '\''`date -R`'\'' --no-edit -n"'
 
 function gd() {
   git diff HEAD~$1
