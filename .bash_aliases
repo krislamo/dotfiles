@@ -9,6 +9,9 @@ alias 'refreshalias'='source ~/.bash_aliases'
 # SSH management
 alias 'editssh'='vim ~/.ssh/config'
 
+# Edit hosts file
+alias 'edithosts'='sudo vim /etc/hosts'
+
 # System packages using apt
 alias 'update'='sudo apt update'
 alias 'upgrade'='sudo apt update && sudo apt upgrade'
