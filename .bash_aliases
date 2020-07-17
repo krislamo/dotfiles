@@ -30,6 +30,7 @@ alias 'vdup'='vagrant destroy -f && vagrant up'
 alias 'vpro'='vagrant provision'
 alias 'vssh'='ssh-add && vagrant ssh'
 alias 'vup'='vagrant up'
+alias 'vhalt'='vagrant halt'
 
 # Change to project folder
 alias 'sw'='cd /home/$USER/software && clear'
