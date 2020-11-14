@@ -25,6 +25,9 @@ alias 'restartgui'='sudo service sddm restart'
 alias 'reboot'='sudo reboot'
 alias 'shutdown'='sudo shutdown'
 
+# Clean up df output
+alias df='df -x squashfs -x tmpfs -x devtmpfs'
+
 # Vagrant shortcuts
 alias 'vdup'='vagrant destroy -f && vagrant up'
 alias 'vpro'='vagrant provision'
