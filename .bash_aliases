@@ -32,7 +32,7 @@ alias df='df -x squashfs -x tmpfs -x devtmpfs'
 # Vagrant shortcuts
 alias 'vdup'='vagrant destroy -f && vagrant up'
 alias 'vpro'='vagrant provision'
-alias 'vssh'='ssh-add && vagrant ssh'
+alias 'vssh'='ssh-add && vagrant ssh -c "sudo -i"'
 alias 'vup'='vagrant up'
 alias 'vhalt'='vagrant halt'
 
