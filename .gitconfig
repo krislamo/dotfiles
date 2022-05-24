@@ -3,3 +3,5 @@
 
 [include]
   path = ~/.gitconfig_other
+[init]
+  defaultBranch = main
