@@ -112,5 +112,8 @@ if ! shopt -oq posix; then
   fi
 fi
 
+# Add ~/.local/bin to PATH
+export PATH="$HOME/.local/bin:$PATH"
+
 # Ask for decryption in terminal window
 export GPG_TTY=$(tty)
