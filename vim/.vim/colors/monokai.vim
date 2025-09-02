@@ -1,3 +1,5 @@
+" SPDX-FileCopyrightText: 2009-2016 Marcin Kulik
+" SPDX-License-Identifier: MIT
 " Vim color file
 " Converted from Textmate theme Monokai using Coloration v0.3.2 (http://github.com/sickill/coloration)
 

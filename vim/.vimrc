@@ -1,3 +1,6 @@
+" SPDX-FileCopyrightText: 2019, 2022 Kris Lamoureux <kris@lamoureux.io>
+" SPDX-License-Identifier: 0BSD
+
 syntax enable
 colorscheme monokai
 set number

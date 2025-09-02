@@ -1,3 +1,9 @@
+# SPDX-FileCopyrightText: 2019 Matthias Klose <doko@debian.org>
+# SPDX-FileCopyrightText: 2019, 2025 Kris Lamoureux <kris@lamoureux.io>
+# SPDX-License-Identifier: GPL-3.0-or-later
+
+# shellcheck shell=bash disable=SC1090,SC1091
+
 # ~/.bashrc: executed by bash(1) for non-login shells.
 # see /usr/share/doc/bash/examples/startup-files (in the package bash-doc)
 # for examples

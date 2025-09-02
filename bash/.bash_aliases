@@ -1,3 +1,8 @@
+# SPDX-FileCopyrightText: 2019-2022, 2025 Kris Lamoureux <kris@lamoureux.io>
+# SPDX-License-Identifier: 0BSD
+
+# shellcheck shell=bash
+
 # Local system administration
 
 # Alias management
