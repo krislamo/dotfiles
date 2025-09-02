@@ -15,15 +15,13 @@ Use GNU Stow to slow down your home directory listings with my
         git clone https://git.krislamo.org/kris/dotfiles.git ~/.dotfiles && \
         cd ~/.dotfiles
 
-    - `stow` targets the parent directory by default, see `-t`
+2.  List available configuration packages
 
-2.  List directories for available configuration sets
-
-        ls -d */
+        basename -a pkgs/*/
 
 3.  Dry run `stow` with `-n` against configuration sets and verify output before
     running
 
-        stow -nv */
+        stow -n $(basename -a pkgs/*/)
 
     - Use `-nvv` for more verbose output.

@@ -1,0 +1,3 @@
+--dir=pkgs
+--target=$HOME
+--verbose
