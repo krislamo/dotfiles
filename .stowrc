@@ -1,3 +1,6 @@
---dir=pkgs
+# SPDX-FileCopyrightText: 2025 Kris Lamoureux <kris@lamoureux.io>
+# SPDX-License-Identifier: 0BSD
+
 --target=$HOME
---verbose
+--no-folding
+--verbose=2
