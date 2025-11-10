@@ -1,0 +1,61 @@
+#!/usr/bin/env bash
+# SPDX-FileCopyrightText: 2025 Kris Lamoureux
+# SPDX-License-Identifier: GPL-3.0-or-later
+set -euo pipefail
+
+for cmd in curl jq; do
+	if ! command -v "$cmd" &>/dev/null; then
+		echo "[ERROR]: $cmd is required but can't be found"
+		exit 1
+	fi
+done
+
+if [ $# -lt 3 ]; then
+	echo "[ERROR]: Missing required arguments"
+	echo "Usage: $0 <priority> <title> <message>"
+	exit 1
+fi
+
+if [ -z "$GOTIFY_URL" ]; then
+	echo "[ERROR]: GOTIFY_URL environment variable is not set"
+	exit 1
+fi
+
+if [ -z "$GOTIFY_TOKEN" ]; then
+	echo "[ERROR]: GOTIFY_TOKEN environment variable is not set"
+	exit 1
+fi
+
+PRIORITY="$1"
+TITLE="$2"
+MESSAGE="$3"
+
+if ! echo "$PRIORITY" | grep -qE '^[0-9]+$'; then
+	echo "[ERROR]: Priority must be a number, got: $PRIORITY"
+	exit 1
+fi
+
+if ! PAYLOAD=$(
+	jq -nc \
+		--argjson priority "$PRIORITY" \
+		--arg title "$TITLE" \
+		--arg message "$MESSAGE" \
+		'{title: $title, message: $message, priority: $priority}'
+); then
+	echo "[ERROR]: Error with input syntax"
+	exit 1
+fi
+
+if ! RESPONSE=$(
+	curl -sSf -X POST "$GOTIFY_URL/message" \
+		-H "X-Gotify-Key: $GOTIFY_TOKEN" \
+		-H "Content-Type: application/json" \
+		-d "$PAYLOAD"
+); then
+	echo "[ERROR]: Couldn't send message to $GOTIFY_URL"
+	echo "$RESPONSE"
+	exit 1
+fi
+
+echo "$RESPONSE"
+exit 0
