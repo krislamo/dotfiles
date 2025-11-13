@@ -16,12 +16,17 @@ if [ $# -lt 3 ]; then
 	exit 1
 fi
 
-if [ -z "$GOTIFY_URL" ]; then
+if [ -d ~/.config/gotify ] && [ -f ~/.config/gotify/env ]; then
+	# shellcheck disable=SC1090
+	. ~/.config/gotify/env
+fi
+
+if [ -z "${GOTIFY_URL:-}" ]; then
 	echo "[ERROR]: GOTIFY_URL environment variable is not set"
 	exit 1
 fi
 
-if [ -z "$GOTIFY_TOKEN" ]; then
+if [ -z "${GOTIFY_TOKEN:-}" ]; then
 	echo "[ERROR]: GOTIFY_TOKEN environment variable is not set"
 	exit 1
 fi
