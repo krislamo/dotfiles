@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+# SPDX-FileCopyrightText: 2025 Kris Lamoureux
+# SPDX-License-Identifier: 0BSD
+exec /usr/bin/docker --context podman "$@"
