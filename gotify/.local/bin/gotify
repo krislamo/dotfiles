@@ -16,9 +16,11 @@ if [ $# -lt 3 ]; then
 	exit 1
 fi
 
-if [ -d ~/.config/gotify ] && [ -f ~/.config/gotify/env ]; then
-	# shellcheck disable=SC1090
-	. ~/.config/gotify/env
+if [ -z "${GOTIFY_URL:-}" ] || [ -z "${GOTIFY_TOKEN:-}" ]; then
+	if [ -d ~/.config/gotify ] && [ -f ~/.config/gotify/env ]; then
+		# shellcheck disable=SC1090
+		. ~/.config/gotify/env
+	fi
 fi
 
 if [ -z "${GOTIFY_URL:-}" ]; then
