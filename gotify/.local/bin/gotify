@@ -10,9 +10,28 @@ for cmd in curl jq; do
 	fi
 done
 
+USAGE="Usage: $0 [-v] <priority> <title> <message>"
+VERBOSE=0
+while getopts "hv" OPT; do
+	case "$OPT" in
+	h)
+		echo "$USAGE"
+		exit 0
+		;;
+	v)
+		VERBOSE=1
+		;;
+	*)
+		echo "$USAGE"
+		exit 1
+		;;
+	esac
+done
+shift $((OPTIND - 1))
+
 if [ $# -lt 3 ]; then
 	echo "[ERROR]: Missing required arguments"
-	echo "Usage: $0 <priority> <title> <message>"
+	echo "$USAGE"
 	exit 1
 fi
 
@@ -64,5 +83,8 @@ if ! RESPONSE=$(
 	exit 1
 fi
 
-echo "$RESPONSE"
+if [ "$VERBOSE" -eq 1 ]; then
+	echo "$RESPONSE"
+fi
+
 exit 0
