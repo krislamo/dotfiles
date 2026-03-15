@@ -12,7 +12,7 @@ alias 'viewalias'='view ~/.bash_aliases'
 alias 'refreshalias'='source ~/.bash_aliases'
 
 # SSH management
-alias 'fssh'='ssh-add && ssh -A'
+alias 'fssh'='ssh-add && ssh -A -S none'
 alias 'editssh'='vim ~/.ssh/config'
 
 # Edit hosts file
