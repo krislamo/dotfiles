@@ -18,3 +18,5 @@ if &term =~ '256color'
   set t_ut=
 endif
 
+" Use tabs in shell
+autocmd FileType sh setlocal tabstop=4 shiftwidth=4 noexpandtab
