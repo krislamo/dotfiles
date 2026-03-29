@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2019-2022, 2025 Kris Lamoureux <kris@lamoureux.io>
+# SPDX-FileCopyrightText: 2019-2022, 2025-2026 Kris Lamoureux <kris@lamoureux.io>
 # SPDX-License-Identifier: 0BSD
 
 # shellcheck shell=bash
@@ -77,20 +77,20 @@ alias 'signhist'='git rebase --exec "git commit -S --amend --no-edit -n"'
 alias 'signhistnew'='git rebase --exec "git commit -S --amend --date '\''`date -R`'\'' --no-edit -n"'
 
 function gd() {
-  git diff HEAD~$1
+	git diff "HEAD~$1"
 }
 
 function rebase() {
-  git rebase -i HEAD~$1
+	git rebase -i "HEAD~$1"
 }
 
 function delcommit() {
-  git reset --hard HEAD~$1
+	git reset --hard "HEAD~$1"
 }
 
 # Docker shortcuts
 function inspect() {
-  docker inspect "$1" | less
+	docker inspect "$1" | less
 }
 
 # Color shift
@@ -103,9 +103,11 @@ alias 'socks'='screen -dm ssh -D 1337 -q -C -N'
 # sshuttle proxy
 #e.g. alias 'proxyhome'='proxy user hostdomain:22 192.168.1.0/24'
 function proxy() {
-  screen -dm sshuttle -v -r $1@$2 -x $2 ${@:2}; screen -r;
+	screen -dm sshuttle -v -r "$1@$2" -x "$2" "${@:2}"
+	screen -r
 }
 
 if [ -f ~/.other_aliases ]; then
-  source ~/.other_aliases
+	# shellcheck disable=SC1090
+	source ~/.other_aliases
 fi
