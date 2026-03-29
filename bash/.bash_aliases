@@ -11,6 +11,10 @@ alias 'otheralias'='vim ~/.other_aliases && . ~/.bash_aliases'
 alias 'viewalias'='view ~/.bash_aliases'
 alias 'refreshalias'='source ~/.bash_aliases'
 
+# File management
+alias put='mv --update=none-fail --verbose'
+alias mv='mv -i'
+
 # SSH management
 alias 'fssh'='ssh-add && ssh -A -S none'
 alias 'editssh'='vim ~/.ssh/config'
