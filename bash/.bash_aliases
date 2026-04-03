@@ -13,6 +13,7 @@ alias 'refreshalias'='source ~/.bash_aliases'
 
 # File management
 alias put='mv --update=none-fail --verbose'
+alias copy='cp --update=none-fail --verbose'
 alias mv='mv -i'
 
 # SSH management
