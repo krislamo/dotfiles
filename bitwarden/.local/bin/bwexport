@@ -1,0 +1,48 @@
+#!/usr/bin/env bash
+set -o pipefail
+msg() {
+	printf '[%s]: %s\n' "$1" "$2"
+}
+
+for cmd in bw gpg gzip; do
+	if ! command -v "$cmd" >/dev/null; then
+		msg 'ERROR' "'$cmd' not found"
+		exit 1
+	fi
+done
+
+read -srp "Vault password: " bw_pw
+echo
+if ! bw_session="$(printf '%s' "$bw_pw" | bw unlock --raw 2>/dev/null)"; then
+	msg 'ERROR' "Couldn't unlock vault"
+	exit 1
+fi
+unset bw_pw
+read -srp "GPG passphrase: " gpg_pw
+echo
+read -srp "Confirm GPG passphrase: " gpg_pw2
+echo
+if [ "$gpg_pw" != "$gpg_pw2" ]; then
+	msg 'ERROR' "Passphrases don't match"
+	exit 1
+fi
+unset gpg_pw2
+
+bw_date="$(TZ='America/New_York' date +%Y%m%dT%H%M)"
+: "${BW_BACKUP:="./bw-export-$bw_date.json.gz.gpg"}"
+if [ -e "$BW_BACKUP" ]; then
+	msg 'ERROR' "Existing file at $BW_BACKUP"
+	exit 1
+fi
+if ! bw export --format json --raw --session "$bw_session" | gzip |
+	gpg --symmetric --cipher-algo AES256 --pinentry-mode loopback \
+		--passphrase-fd 3 --batch -q \
+		-o "$BW_BACKUP" 3<<<"$gpg_pw"; then
+	msg 'ERROR' "Export failed"
+	unset gpg_pw
+	exit 1
+fi
+unset gpg_pw
+bw lock --session "$bw_session" >/dev/null 2>&1
+unset bw_session
+msg 'INFO' "Exported to '$BW_BACKUP'"
