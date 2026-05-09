@@ -1,4 +1,7 @@
 #!/usr/bin/env bash
+# SPDX-FileCopyrightText: 2026 Kris Lamoureux <kris@lamoureux.io>
+# SPDX-License-Identifier: 0BSD
+
 set -o pipefail
 msg() {
 	printf '[%s]: %s\n' "$1" "$2"
