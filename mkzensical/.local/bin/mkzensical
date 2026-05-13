@@ -1,0 +1,68 @@
+#!/usr/bin/env bash
+# SPDX-FileCopyrightText: 2026 Kris Lamoureux <kris@lamoureux.io>
+# SPDX-License-Identifier: 0BSD
+
+prog=${0##*/}
+
+err() {
+	printf '%s: %s\n' "$prog" "$1" >&2
+	logger -t "$prog" -p user.err "$1"
+	exit 1
+}
+
+usage() {
+	printf 'usage: %s [-z] <zensical_version> <repo_dir>\n' "$prog" >&2
+}
+
+selinux=0
+while getopts ':z' opt; do
+	case $opt in
+	z)
+		selinux=1
+		;;
+	*)
+		usage
+		exit 1
+		;;
+	esac
+done
+shift $((OPTIND - 1))
+
+if (($# != 2)); then
+	usage
+	exit 1
+fi
+
+tag=$1
+dir=$2
+
+if [[ ! $tag =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+	err "tag must be a version like 1.2.3 (got: $tag)"
+fi
+
+[[ ! -d $dir ]] && err "not a directory: $dir"
+cd "$dir" || err "failed to enter directory: $dir"
+git rev-parse --is-inside-work-tree &>/dev/null ||
+	err "not a git repository: $(pwd)"
+
+branch=$(git branch --show-current) || err "failed to get current branch"
+[[ -n $branch ]] || err "not on a branch"
+[[ $branch == main ]] || err "not on main branch: $branch"
+
+status=$(git status --porcelain) || err "git status failed at: $(pwd)"
+[[ -n $status ]] && err "working tree is dirty"
+
+old=$(git rev-parse HEAD) || err "git rev-parse failed at: $(pwd)"
+git pull -q --ff-only || err "failed to update repo"
+new=$(git rev-parse HEAD) || err "git rev-parse failed after pull at: $(pwd)"
+
+if [[ $old != "$new" || ! -d site ]]; then
+	docker_opts=(run --rm)
+	[[ $selinux -eq 1 ]] && docker_opts+=(--security-opt label=level:s0)
+	docker_opts+=(-v "$PWD:/docs" "zensical/zensical:$tag" build)
+	if ! docker "${docker_opts[@]}"; then
+		err "build failed"
+	fi
+fi
+
+[[ -d site ]] || err "build did not produce site directory"
