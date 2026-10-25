@@ -1,0 +1,171 @@
+#!/usr/bin/env bash
+# SPDX-FileCopyrightText: 2026 Kris Lamoureux
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+# Runs each check in the checks dir, and any output, non-zero exit,
+# or timeout is pushed with a custom gotify script.
+#
+#                user                         root
+#   bin          ~/.local/bin/                /usr/local/bin/
+#   checks       ~/.config/nag-checks/        /opt/nag-checks/
+#   cache        ~/.local/state/nag-checks/   /var/lib/nag-checks/
+#   units        ~/.config/systemd/user/      /etc/systemd/system/
+#
+# To install, cd to the units dir and paste each unit below into its file,
+# '#'s included. Then:
+#   sed -i 's/^#   //; s/^#$//' nag-checks.service nag-checks.timer
+#   systemctl --user daemon-reload
+#   systemctl --user enable --now nag-checks.timer
+#   loginctl enable-linger
+# The last one keeps checks running after you log out. Override NAG_CHECKS_*
+# with Environment= via `systemctl --user edit nag-checks.service`.
+#
+# For root instead, use the root paths, drop --user and the linger step, and
+# use this sed. It points ExecStart at /usr/local/bin and removes the PATH
+# line so root keeps systemd's default PATH:
+#   sed -i 's/^#   //; s/^#$//; /^Environment=/d; s|%h/.local|/usr/local|' \
+#     nag-checks.service nag-checks.timer
+#
+# nag-checks.service
+#   [Unit]
+#   Description=Run nag checks
+#
+#   [Service]
+#   Type=oneshot
+#   ExecStart=%h/.local/bin/nag
+#   Environment=PATH=%h/.local/bin:/usr/local/bin:/usr/bin
+#   TimeoutStartSec=30min
+#
+# nag-checks.timer
+#   [Unit]
+#   Description=Run nag checks every 5 minutes
+#
+#   [Timer]
+#   OnCalendar=*:0/5
+#
+#   [Install]
+#   WantedBy=timers.target
+
+if ((EUID == 0)); then
+	default_dir=/opt/nag-checks
+	default_cache=/var/lib/nag-checks
+else
+	default_dir=${XDG_CONFIG_HOME:-$HOME/.config}/nag-checks
+	default_cache=${XDG_STATE_HOME:-$HOME/.local/state}/nag-checks
+fi
+
+NAG_CHECKS_DIR=${NAG_CHECKS_DIR:-$default_dir}
+NAG_CHECKS_CACHE=${NAG_CHECKS_CACHE:-$default_cache}
+NAG_CHECKS_INTERVAL=${NAG_CHECKS_INTERVAL:-$((6 * 60 * 60))}
+NAG_CHECKS_TIMEOUT=${NAG_CHECKS_TIMEOUT:-60}
+
+prog=${0##*/}
+
+info() {
+	printf '[%s]: %s\n' "$prog" "$*"
+}
+
+err() {
+	info "$@" >&2
+}
+
+die() {
+	err "$@"
+	exit 1
+}
+
+for bin in gotify mkdir rm timeout; do
+	if ! command -v "$bin" &>/dev/null; then
+		die "missing $bin"
+	fi
+done
+
+if [[ ! -d $NAG_CHECKS_DIR ]]; then
+	die "missing $NAG_CHECKS_DIR"
+fi
+
+if [[ ! $NAG_CHECKS_INTERVAL =~ ^[0-9]+$ ]]; then
+	die "NAG_CHECKS_INTERVAL must be seconds: '$NAG_CHECKS_INTERVAL'"
+fi
+
+if ! mkdir -p "$NAG_CHECKS_CACHE"; then
+	die "cannot create $NAG_CHECKS_CACHE"
+fi
+
+failed=0
+printf -v now '%(%s)T' -1
+shopt -s nullglob
+for check in "$NAG_CHECKS_DIR"/*; do
+	name=${check##*/}
+	case $name in
+	*.* | *~) continue ;;
+	esac
+	if [[ ! -f $check || ! -x $check ]]; then
+		err "skipping '$name': not an executable file"
+		failed=1
+		continue
+	fi
+
+	if [[ ! -O $check ]]; then
+		err "skipping '$name': not owned by uid $EUID"
+		failed=1
+		continue
+	fi
+
+	out=$(timeout -k 10 "$NAG_CHECKS_TIMEOUT" "$check" 2>&1)
+	rc=$?
+	if ((rc == 124 || rc > 128)); then
+		out="[timed out or killed: exit $rc]${out:+$'\n'}$out"
+	elif ((rc != 0)); then
+		out="[exit $rc]${out:+$'\n'}$out"
+	fi
+
+	if [[ -z $out ]]; then
+		if [[ -f $NAG_CHECKS_CACHE/$name ]]; then
+			if timeout "$NAG_CHECKS_TIMEOUT" \
+				gotify 1 "$prog: $name" '[resolved]'; then
+				info "resolved $name"
+				if ! rm -f "$NAG_CHECKS_CACHE/$name"; then
+					failed=1
+				fi
+			else
+				err "push failed for $name"
+				failed=1
+			fi
+		fi
+		continue
+	fi
+
+	last=0
+	old=''
+	if [[ -f $NAG_CHECKS_CACHE/$name ]]; then
+		old=$(<"$NAG_CHECKS_CACHE/$name")
+		last=${old%%$'\n'*}
+		old=${old#*$'\n'}
+	fi
+
+	if ((now - last < NAG_CHECKS_INTERVAL)) && [[ $out == "$old" ]]; then
+		continue
+	fi
+
+	msg=$out
+	if ((${#msg} > 4096)); then
+		msg=${msg:0:4096}
+		msg+=$'\n'"[truncated: $NAG_CHECKS_CACHE/$name]"
+		err "truncated $name from ${#out} chars"
+	fi
+
+	if timeout "$NAG_CHECKS_TIMEOUT" \
+		gotify 1 "$prog: $name" "$msg"; then
+		info "sent $name"
+		if ! printf '%s\n%s\n' "$now" "$out" \
+			>"$NAG_CHECKS_CACHE/$name"; then
+			err "cannot write cache for $name"
+			failed=1
+		fi
+	else
+		err "push failed for $name"
+		failed=1
+	fi
+done
+exit "$failed"
