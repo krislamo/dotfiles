@@ -2,49 +2,37 @@
 # SPDX-FileCopyrightText: 2026 Kris Lamoureux
 # SPDX-License-Identifier: GPL-3.0-or-later
 #
-# Runs each check in the checks dir, and any output, non-zero exit,
-# or timeout is pushed with a custom gotify script.
+# Runs each executable in the checks dir. Any output, non-zero exit, or
+# timeout is sent, repeated every NAG_CHECKS_INTERVAL while unchanged, and
+# followed by [resolved] once the check goes quiet.
 #
-#                user                         root
-#   bin          ~/.local/bin/                /usr/local/bin/
-#   checks       ~/.config/nag-checks/        /opt/nag-checks/
-#   cache        ~/.local/state/nag-checks/   /var/lib/nag-checks/
-#   units        ~/.config/systemd/user/      /etc/systemd/system/
+#   NAG_CHECKS_SENDER    gotify (default), zulip, mail, or CMD TITLE MESSAGE
+#   NAG_CHECKS_MAILTO    recipient for mail (root)
+#   NAG_CHECKS_INTERVAL  seconds between repeats (21600)
+#   NAG_CHECKS_TIMEOUT   seconds per check and per send (60)
 #
-# To install, cd to the units dir and paste each unit below into its file,
-# '#'s included. Then:
-#   sed -i 's/^#   //; s/^#$//' nag-checks.service nag-checks.timer
-#   systemctl --user daemon-reload
-#   systemctl --user enable --now nag-checks.timer
+#              user                         root
+#   checks     ~/.config/nag-checks/        /opt/nag-checks/
+#   cache      ~/.local/state/nag-checks/   /var/lib/nag-checks/
+#
+# Install, from the stow dir:
+#   stow nag
 #   loginctl enable-linger
-# The last one keeps checks running after you log out. Override NAG_CHECKS_*
-# with Environment= via `systemctl --user edit nag-checks.service`.
+#   systemctl --user daemon-reload
+#   systemctl --user enable --now nag.timer
+# With xstow, instead of stow nag:
+#   mkdir -p ~/.local/bin ~/.config/systemd/user
+#   xstow -t ~ nag
 #
-# For root instead, use the root paths, drop --user and the linger step, and
-# use this sed. It points ExecStart at /usr/local/bin and removes the PATH
-# line so root keeps systemd's default PATH:
-#   sed -i 's/^#   //; s/^#$//; /^Environment=/d; s|%h/.local|/usr/local|' \
-#     nag-checks.service nag-checks.timer
-#
-# nag-checks.service
-#   [Unit]
-#   Description=Run nag checks
-#
-#   [Service]
-#   Type=oneshot
-#   ExecStart=%h/.local/bin/nag
-#   Environment=PATH=%h/.local/bin:/usr/local/bin:/usr/bin
-#   TimeoutStartSec=30min
-#
-# nag-checks.timer
-#   [Unit]
-#   Description=Run nag checks every 5 minutes
-#
-#   [Timer]
-#   OnCalendar=*:0/5
-#
-#   [Install]
-#   WantedBy=timers.target
+# Settings, add Environment=
+#   systemctl --user edit nag.service
+# Schedule, add OnCalendar= then e.g. OnCalendar=*:0/5
+#   systemctl --user edit nag.timer
+# Merged config
+#   systemctl --user cat nag.service nag.timer
+# Disable, which also deletes the stowed timer link
+#   systemctl --user disable --now nag.timer
+# As root, keep the stow dir in /root.
 
 if ((EUID == 0)); then
 	default_dir=/opt/nag-checks
@@ -58,6 +46,8 @@ NAG_CHECKS_DIR=${NAG_CHECKS_DIR:-$default_dir}
 NAG_CHECKS_CACHE=${NAG_CHECKS_CACHE:-$default_cache}
 NAG_CHECKS_INTERVAL=${NAG_CHECKS_INTERVAL:-$((6 * 60 * 60))}
 NAG_CHECKS_TIMEOUT=${NAG_CHECKS_TIMEOUT:-60}
+NAG_CHECKS_SENDER=${NAG_CHECKS_SENDER:-gotify}
+NAG_CHECKS_MAILTO=${NAG_CHECKS_MAILTO:-root}
 
 prog=${0##*/}
 
@@ -74,7 +64,34 @@ die() {
 	exit 1
 }
 
-for bin in gotify mkdir rm timeout; do
+send() {
+	local title=$1 msg=$2
+	case $NAG_CHECKS_SENDER in
+	gotify)
+		timeout "$NAG_CHECKS_TIMEOUT" gotify 1 "$title" "$msg"
+		;;
+	zulip)
+		timeout "$NAG_CHECKS_TIMEOUT" \
+			zulipme "$title"$'\n```\n'"$msg"$'\n```'
+		;;
+	mail)
+		timeout "$NAG_CHECKS_TIMEOUT" \
+			mail -s "[$HOSTNAME] $title" "$NAG_CHECKS_MAILTO" <<<"$msg"
+		;;
+	*)
+		timeout "$NAG_CHECKS_TIMEOUT" "$NAG_CHECKS_SENDER" "$title" "$msg"
+		;;
+	esac
+}
+
+case $NAG_CHECKS_SENDER in
+gotify) sender=gotify ;;
+zulip) sender=zulipme ;;
+mail) sender=mail ;;
+*) sender=$NAG_CHECKS_SENDER ;;
+esac
+
+for bin in "$sender" mkdir rm timeout; do
 	if ! command -v "$bin" &>/dev/null; then
 		die "missing $bin"
 	fi
@@ -88,7 +105,11 @@ if [[ ! $NAG_CHECKS_INTERVAL =~ ^[0-9]+$ ]]; then
 	die "NAG_CHECKS_INTERVAL must be seconds: '$NAG_CHECKS_INTERVAL'"
 fi
 
-if ! mkdir -p "$NAG_CHECKS_CACHE"; then
+if [[ ! $NAG_CHECKS_TIMEOUT =~ ^[0-9]+$ ]]; then
+	die "NAG_CHECKS_TIMEOUT must be seconds: '$NAG_CHECKS_TIMEOUT'"
+fi
+
+if ! mkdir -p -m 700 "$NAG_CHECKS_CACHE"; then
 	die "cannot create $NAG_CHECKS_CACHE"
 fi
 
@@ -122,8 +143,7 @@ for check in "$NAG_CHECKS_DIR"/*; do
 
 	if [[ -z $out ]]; then
 		if [[ -f $NAG_CHECKS_CACHE/$name ]]; then
-			if timeout "$NAG_CHECKS_TIMEOUT" \
-				gotify 1 "$prog: $name" '[resolved]'; then
+			if send "$prog: $name" '[resolved]'; then
 				info "resolved $name"
 				if ! rm -f "$NAG_CHECKS_CACHE/$name"; then
 					failed=1
@@ -155,8 +175,7 @@ for check in "$NAG_CHECKS_DIR"/*; do
 		err "truncated $name from ${#out} chars"
 	fi
 
-	if timeout "$NAG_CHECKS_TIMEOUT" \
-		gotify 1 "$prog: $name" "$msg"; then
+	if send "$prog: $name" "$msg"; then
 		info "sent $name"
 		if ! printf '%s\n%s\n' "$now" "$out" \
 			>"$NAG_CHECKS_CACHE/$name"; then

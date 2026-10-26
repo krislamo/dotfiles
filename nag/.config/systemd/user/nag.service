@@ -1,0 +1,8 @@
+[Unit]
+Description=Run nag checks
+
+[Service]
+Type=oneshot
+ExecStart=%h/.local/bin/nag
+Environment=PATH=%h/.local/bin:/usr/local/bin:/usr/sbin:/usr/bin
+TimeoutStartSec=30min
