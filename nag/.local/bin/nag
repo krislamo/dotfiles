@@ -71,8 +71,20 @@ send() {
 		timeout "$NAG_CHECKS_TIMEOUT" gotify 1 "$title" "$msg"
 		;;
 	zulip)
+		local recipients_file=$NAG_CHECKS_DIR/$name.recipients
+		local recipients
+		local args=(-t "$title")
+
+		if [[ -e $recipients_file ]]; then
+			if ! IFS= read -r recipients <"$recipients_file"; then
+				err "cannot read recipients for $name"
+				return 1
+			fi
+			args+=(-r "$recipients")
+		fi
+
 		timeout "$NAG_CHECKS_TIMEOUT" \
-			zulipme "$title"$'\n```\n'"$msg"$'\n```'
+			zulipme "${args[@]}" $'```\n'"$msg"$'\n```'
 		;;
 	mail)
 		timeout "$NAG_CHECKS_TIMEOUT" \
@@ -109,6 +121,7 @@ if [[ ! $NAG_CHECKS_TIMEOUT =~ ^[0-9]+$ ]]; then
 	die "NAG_CHECKS_TIMEOUT must be seconds: '$NAG_CHECKS_TIMEOUT'"
 fi
 
+# shellcheck disable=SC2174
 if ! mkdir -p -m 700 "$NAG_CHECKS_CACHE"; then
 	die "cannot create $NAG_CHECKS_CACHE"
 fi
